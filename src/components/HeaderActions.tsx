@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Plus, LogOut, FolderOpen, ChevronDown } from "lucide-react";
+import { Plus, LogOut, FolderOpen, ChevronDown, Code2, Sparkles } from "lucide-react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { signOut } from "@/actions";
 import { getProjects } from "@/actions/get-projects";
 import { createProject } from "@/actions/create-project";
+import { getUserExperienceMode, setUserExperienceMode } from "@/lib/utils/tool-translations";
 import {
   Popover,
   PopoverContent,
@@ -45,6 +46,12 @@ export function HeaderActions({ user, projectId }: HeaderActionsProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [experienceMode, setExperienceMode] = useState<"simple" | "developer">("simple");
+
+  // Load experience mode on mount
+  useEffect(() => {
+    setExperienceMode(getUserExperienceMode());
+  }, []);
 
   // Load projects initially
   useEffect(() => {
@@ -92,6 +99,14 @@ export function HeaderActions({ user, projectId }: HeaderActionsProps) {
     router.push(`/${project.id}`);
   };
 
+  const handleModeToggle = () => {
+    const newMode = experienceMode === "simple" ? "developer" : "simple";
+    setExperienceMode(newMode);
+    setUserExperienceMode(newMode);
+    // Force re-render of messages
+    window.location.reload();
+  };
+
   if (!user) {
     return (
       <>
@@ -114,6 +129,25 @@ export function HeaderActions({ user, projectId }: HeaderActionsProps) {
 
   return (
     <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        className="h-8 gap-2"
+        onClick={handleModeToggle}
+        title={experienceMode === "simple" ? "Switch to Developer Mode" : "Switch to Simple Mode"}
+      >
+        {experienceMode === "simple" ? (
+          <>
+            <Sparkles className="h-4 w-4" />
+            Simple Mode
+          </>
+        ) : (
+          <>
+            <Code2 className="h-4 w-4" />
+            Developer Mode
+          </>
+        )}
+      </Button>
+      
       {!initialLoading && (
         <Popover open={projectsOpen} onOpenChange={setProjectsOpen}>
           <PopoverTrigger asChild>

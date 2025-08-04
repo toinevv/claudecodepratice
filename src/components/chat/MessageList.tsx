@@ -4,6 +4,7 @@ import { Message } from "ai";
 import { cn } from "@/lib/utils";
 import { User, Bot, Loader2 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { getToolInfo, getUserExperienceMode } from "@/lib/utils/tool-translations";
 
 interface MessageListProps {
   messages: Message[];
@@ -13,7 +14,7 @@ interface MessageListProps {
 export function MessageList({ messages, isLoading }: MessageListProps) {
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full px-4 text-center">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] px-4 text-center">
         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 mb-4 shadow-sm">
           <Bot className="h-7 w-7 text-blue-600" />
         </div>
@@ -76,6 +77,27 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                             );
                           case "tool-invocation":
                             const tool = part.toolInvocation;
+                            const toolInfo = getToolInfo(tool.toolName);
+                            const mode = getUserExperienceMode();
+                            
+                            if (mode === "simple") {
+                              return (
+                                <div key={partIndex} className="inline-flex items-center gap-2 mt-2 text-sm text-neutral-600">
+                                  {tool.state === "result" && tool.result ? (
+                                    <>
+                                      <span>{toolInfo.icon}</span>
+                                      <span>{toolInfo.completedMessage}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                                      <span>{toolInfo.loadingMessage}</span>
+                                    </>
+                                  )}
+                                </div>
+                              );
+                            }
+                            
                             return (
                               <div key={partIndex} className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-mono border border-neutral-200">
                                 {tool.state === "result" && tool.result ? (

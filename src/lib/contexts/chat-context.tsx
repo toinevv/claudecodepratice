@@ -10,6 +10,7 @@ import { useChat as useAIChat } from "@ai-sdk/react";
 import { Message } from "ai";
 import { useFileSystem } from "./file-system-context";
 import { setHasAnonWork } from "@/lib/anon-work-tracker";
+import { getUserExperienceMode } from "@/lib/utils/tool-translations";
 
 interface ChatContextProps {
   projectId?: string;
@@ -45,6 +46,7 @@ export function ChatProvider({
     body: {
       files: fileSystem.serialize(),
       projectId,
+      experienceMode: getUserExperienceMode(),
     },
     onToolCall: ({ toolCall }) => {
       handleToolCall(toolCall);

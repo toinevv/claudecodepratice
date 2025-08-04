@@ -7,18 +7,22 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { getLanguageModel } from "@/lib/provider";
 import { generationPrompt } from "@/lib/prompts/generation";
+import { simpleGenerationPrompt } from "@/lib/prompts/simple-generation";
 
 export async function POST(req: Request) {
   const {
     messages,
     files,
     projectId,
-  }: { messages: any[]; files: Record<string, FileNode>; projectId?: string } =
+    experienceMode = "simple",
+  }: { messages: any[]; files: Record<string, FileNode>; projectId?: string; experienceMode?: "simple" | "developer" } =
     await req.json();
+
+  const systemPrompt = experienceMode === "developer" ? generationPrompt : simpleGenerationPrompt;
 
   messages.unshift({
     role: "system",
-    content: generationPrompt,
+    content: systemPrompt,
     providerOptions: {
       anthropic: { cacheControl: { type: "ephemeral" } },
     },

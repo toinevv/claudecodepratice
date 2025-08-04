@@ -1,0 +1,29 @@
+name: Claude Code Action
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    types: [opened, edited, synchronize]
+  pull_request_review_comment:
+    types: [created, edited]
+
+jobs:
+  claude-code:
+    runs-on: ubuntu-latest
+    
+    # Only run on issues/PRs that mention @claude-code or have the claude-code label
+    if: |
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude-code') || contains(github.event.issue.labels.*.name, 'claude-code'))) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude-code')) ||
+      (github.event_name == 'pull_request' && (contains(github.event.pull_request.body, '@claude-code') || contains(github.event.pull_request.labels.*.name, 'claude-code'))) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude-code'))
+    
+    steps:
+      - name: Claude Code Action Official
+        uses: anthropics/claude-code-action@beta
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
